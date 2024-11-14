@@ -51,3 +51,20 @@ app.get('/lessons', async (req, res) => {
     }
   });
   
+  // POST route to create a new order
+  app.post('/orders', async (req, res) => {
+    const { name, phone, lessonIDs, spaces } = req.body;
+    
+    if (!name || !phone || !Array.isArray(lessonIDs) || lessonIDs.length === 0) {
+      return res.status(400).json({ message: 'Invalid order data' });
+    }
+  
+    try {
+      const order = { name, phone, lessonIDs: lessonIDs.map(id => new ObjectId(id)), spaces };
+      const result = await ordersCollection.insertOne(order);
+      res.json({ message: 'Order created successfully', orderId: result.insertedId });
+    } catch (error) {
+      res.status(500).json({ message: 'Error creating order', error });
+    }
+  });
+  
