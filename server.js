@@ -26,7 +26,7 @@ client.connect()
     const db = client.db('your-database-name');
     lessonsCollection = db.collection('lessons');
     ordersCollection = db.collection('orders');
-    console.log('Connected to MongoDB'');
+    console.log('Connected to MongoDB');
     
     // Start the server only after connecting to the database
     app.listen(port, () => {
