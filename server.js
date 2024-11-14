@@ -93,3 +93,22 @@ app.get('/lessons', async (req, res) => {
     }
   });
   
+  // Search functionality for lessons (GET /search)
+  app.get('/search', async (req, res) => {
+    const query = req.query.q;
+    const searchCriteria = {
+      $or: [
+        { topic: { $regex: query, $options: 'i' } },
+        { location: { $regex: query, $options: 'i' } },
+        { price: { $regex: query, $options: 'i' } },
+        { space: { $regex: query, $options: 'i' } }
+      ]
+    };
+  
+    try {
+      const results = await lessonsCollection.find(searchCriteria).toArray();
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: 'Error searching lessons', error });
+    }
+  });
