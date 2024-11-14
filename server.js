@@ -41,3 +41,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// GET route to fetch all lessons
+app.get('/lessons', async (req, res) => {
+    try {
+      const lessons = await lessonsCollection.find().toArray();
+      res.json(lessons);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching lessons', error });
+    }
+  });
+  
