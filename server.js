@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const { MongoClient, ObjectId } = require('mongodb');
 const morgan = require('morgan');
 const path = require('path');
@@ -9,6 +10,9 @@ const port = 3000;
 // MongoDB connection setup
 const mongoUri = 'mongodb+srv://test:test@cluster0.j29h4.mongodb.net/'; // replace with your MongoDB Atlas URI
 const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+// Enable CORS
+app.use(cors());
 
 // Middleware
 app.use(express.json()); // Parses incoming JSON requests
@@ -23,7 +27,7 @@ let lessonsCollection, ordersCollection;
 // Connect to MongoDB
 client.connect()
   .then(() => {
-    const db = client.db('your-database-name');
+    const db = client.db('EduClassCards');
     lessonsCollection = db.collection('lessons');
     ordersCollection = db.collection('orders');
     console.log('Connected to MongoDB');
