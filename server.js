@@ -109,8 +109,8 @@ app.get('/lessons', async (req, res) => {
       $or: [
         { subject: { $regex: query, $options: 'i' } },
         { location: { $regex: query, $options: 'i' } },
-        // { price: { $regex: query, $options: 'i' } },
-        // { space: { $regex: query, $options: 'i' } }
+        { price: { $regex: query, $options: 'i' } },
+        { space: { $regex: query, $options: 'i' } }
       ]
     };
   
