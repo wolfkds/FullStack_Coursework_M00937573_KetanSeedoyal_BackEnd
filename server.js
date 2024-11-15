@@ -100,19 +100,25 @@ app.get('/lessons', async (req, res) => {
   // Search functionality for lessons (GET /search)
   app.get('/search', async (req, res) => {
     const query = req.query.q;
+
+    if (!query) {
+      return res.status(400).json({ message: 'Search query cannot be empty' });
+    }
+
     const searchCriteria = {
       $or: [
-        { topic: { $regex: query, $options: 'i' } },
+        { subject: { $regex: query, $options: 'i' } },
         { location: { $regex: query, $options: 'i' } },
-        { price: { $regex: query, $options: 'i' } },
-        { space: { $regex: query, $options: 'i' } }
+        // { price: { $regex: query, $options: 'i' } },
+        // { space: { $regex: query, $options: 'i' } }
       ]
     };
   
     try {
       const results = await lessonsCollection.find(searchCriteria).toArray();
-      res.json(results);
+      res.json({ success: true, results });
     } catch (error) {
-      res.status(500).json({ message: 'Error searching lessons', error });
+      console.error('Error in /search:', error);
+      res.status(500).json({ success: false, message: 'Internal server error', error });
     }
   });
