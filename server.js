@@ -3,6 +3,7 @@ const cors = require('cors');
 const { MongoClient, ObjectId } = require('mongodb');
 const morgan = require('morgan');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -20,6 +21,20 @@ app.use(morgan('dev')); // Logs requests to the console
 
 // Static files middleware for lesson images
 app.use('/images', express.static(path.join(__dirname, 'images')));
+// app.use('/images', (req, res, next) => {
+//   const filePath = path.join(__dirname, 'images', req.path);
+
+//   // Check if the file exists
+//   fs.access(filePath, fs.constants.F_OK, (err) => {
+//     if (err) {
+//       // File does not exist
+//       res.status(404).json({ message: 'Image not found' });
+//     } else {
+//       // Serve the image
+//       res.sendFile(filePath);
+//     }
+//   });
+// });
 
 // Database and collection references
 let lessonsCollection, ordersCollection;
