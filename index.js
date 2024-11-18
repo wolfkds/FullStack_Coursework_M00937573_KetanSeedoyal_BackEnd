@@ -129,7 +129,7 @@ app.put('/lessons/:lessonId', async (req, res) => {
   const updatedFields = req.body; // This captures all fields sent in the request body
 
   try {
-    const updatedLesson = await Lesson.findByIdAndUpdate(
+    const updatedLesson = await lessonsCollection.findByIdAndUpdate(
       lessonId,
       updatedFields, // All fields in the request body will be updated
       { new: true } // Returns the updated document
