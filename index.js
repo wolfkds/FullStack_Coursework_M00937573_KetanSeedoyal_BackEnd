@@ -100,29 +100,51 @@ app.post("/orders", async (req, res) => {
 });
 
 // PUT route to update lesson availability after an order
-app.put("/lessons/:id", async (req, res) => {
-  const lessonId = req.params.id;
-  const { space } = req.body;
+// app.put("/lessons/:id", async (req, res) => {
+//   const lessonId = req.params.id;
+//   const { space } = req.body;
 
-  if (typeof space !== "number" || space < 0) {
-    return res.status(400).json({ message: "Invalid space value" });
-  }
+//   if (typeof space !== "number" || space < 0) {
+//     return res.status(400).json({ message: "Invalid space value" });
+//   }
+
+//   try {
+//     const result = await lessonsCollection.updateOne(
+//       { _id: new ObjectId(lessonId) },
+//       { $set: { space } }
+//     );
+
+//     if (result.matchedCount === 0) {
+//       res.status(404).json({ message: "Lesson not found" });
+//     } else {
+//       res.json({ message: "Lesson updated successfully" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ message: "Error updating lesson", error });
+//   }
+// });
+
+// PUT route to update lesson details
+app.put('/lessons/:id', async (req, res) => {
+  const lessonId = req.params.id;
+  const updatedFields = req.body;
 
   try {
     const result = await lessonsCollection.updateOne(
       { _id: new ObjectId(lessonId) },
-      { $set: { space } }
+      { $set: updatedFields }
     );
 
     if (result.matchedCount === 0) {
-      res.status(404).json({ message: "Lesson not found" });
+      res.status(404).json({ message: 'Lesson not found' });
     } else {
-      res.json({ message: "Lesson updated successfully" });
+      res.json({ message: 'Lesson updated successfully', updatedFields });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error updating lesson", error });
+    res.status(500).json({ message: 'Error updating lesson', error });
   }
 });
+
 
 // Search functionality for lessons (GET /search)
 app.get("/search", async (req, res) => {
