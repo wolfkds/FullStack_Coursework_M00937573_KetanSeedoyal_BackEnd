@@ -100,29 +100,51 @@ app.post("/orders", async (req, res) => {
 });
 
 // PUT route to update lesson availability after an order
-app.put("/lessons/:id", async (req, res) => {
-  const lessonId = req.params.id;
-  const { space } = req.body;
+// app.put("/lessons/:id", async (req, res) => {
+//   const lessonId = req.params.id;
+//   const { space } = req.body;
 
-  if (typeof space !== "number" || space < 0) {
-    return res.status(400).json({ message: "Invalid space value" });
-  }
+//   if (typeof space !== "number" || space < 0) {
+//     return res.status(400).json({ message: "Invalid space value" });
+//   }
+
+//   try {
+//     const result = await lessonsCollection.updateOne(
+//       { _id: new ObjectId(lessonId) },
+//       { $set: { space } }
+//     );
+
+//     if (result.matchedCount === 0) {
+//       res.status(404).json({ message: "Lesson not found" });
+//     } else {
+//       res.json({ message: "Lesson updated successfully" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ message: "Error updating lesson", error });
+//   }
+// });
+
+app.put('/lessons/:lessonId', async (req, res) => {
+  const { lessonId } = req.params;
+  const updatedFields = req.body; // This captures all fields sent in the request body
 
   try {
-    const result = await lessonsCollection.updateOne(
-      { _id: new ObjectId(lessonId) },
-      { $set: { space } }
+    const updatedLesson = await Lesson.findByIdAndUpdate(
+      lessonId,
+      updatedFields, // All fields in the request body will be updated
+      { new: true } // Returns the updated document
     );
 
-    if (result.matchedCount === 0) {
-      res.status(404).json({ message: "Lesson not found" });
-    } else {
-      res.json({ message: "Lesson updated successfully" });
+    if (!updatedLesson) {
+      return res.status(404).json({ error: "Lesson not found" });
     }
+
+    res.json({ message: "Lesson updated successfully", updatedLesson });
   } catch (error) {
-    res.status(500).json({ message: "Error updating lesson", error });
+    res.status(500).json({ error: "Error updating lesson" });
   }
 });
+
 
 // PUT route to update lesson details
 // app.put("/lessons/:lessonId", async (req, res) => {
