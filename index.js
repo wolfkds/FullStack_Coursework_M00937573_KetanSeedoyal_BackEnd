@@ -124,26 +124,35 @@ app.post("/orders", async (req, res) => {
 //   }
 // });
 
-app.put('/lessons/:lessonId', async (req, res) => {
-  const { lessonId } = req.params;
-  const updatedFields = req.body; // This captures all fields sent in the request body
+app.put("/lessons/:id", async (req, res) => {
+  const lessonId = req.params.id;
+  const updatedFields = req.body; // Contains all fields to update
+
+  // Validate input: Ensure the fields provided in `req.body` are valid
+  if (Object.keys(updatedFields).length === 0) {
+    return res.status(400).json({ message: "No fields provided for update" });
+  }
 
   try {
-    const updatedLesson = await lessonsCollection.findByIdAndUpdate(
-      lessonId,
-      updatedFields, // All fields in the request body will be updated
-      { new: true } // Returns the updated document
+    // Attempt to update the lesson with the provided fields
+    const result = await lessonsCollection.updateOne(
+      { _id: new ObjectId(lessonId) },
+      { $set: updatedFields } // Dynamically set fields from `req.body`
     );
 
-    if (!updatedLesson) {
-      return res.status(404).json({ error: "Lesson not found" });
+    if (result.matchedCount === 0) {
+      // Lesson with the given ID not found
+      res.status(404).json({ message: "Lesson not found" });
+    } else {
+      // Update successful
+      res.json({ message: "Lesson updated successfully" });
     }
-
-    res.json({ message: "Lesson updated successfully", updatedLesson });
   } catch (error) {
-    res.status(500).json({ error: "Error updating lesson" });
+    console.error("Error updating lesson:", error);
+    res.status(500).json({ message: "Error updating lesson", error });
   }
 });
+
 
 
 // PUT route to update lesson details
