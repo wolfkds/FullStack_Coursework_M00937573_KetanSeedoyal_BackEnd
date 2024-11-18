@@ -125,25 +125,36 @@ app.post("/orders", async (req, res) => {
 // });
 
 // PUT route to update lesson details
-app.put('/lessons/:id', async (req, res) => {
-  const lessonId = req.params.id;
-  const updatedFields = req.body;
-
+app.put("/lessons/:lessonId", async (req, res) => {
   try {
-    const result = await lessonsCollection.updateOne(
-      { _id: new ObjectId(lessonId) },
-      { $set: updatedFields }
+    const lessonId = req.params.lessonId;
+    const { space } = req.body; // Only expecting the space field
+
+    if (space < 0) {
+      return res.status(400).json({ message: "Space cannot be negative" });
+    }
+
+    // Update the space field of the specified lesson
+    const updatedLesson = await Lesson.findByIdAndUpdate(
+      lessonId,
+      { space },
+      { new: true, runValidators: true } // Return the updated document and enforce validation
     );
 
-    if (result.matchedCount === 0) {
-      res.status(404).json({ message: 'Lesson not found' });
-    } else {
-      res.json({ message: 'Lesson updated successfully', updatedFields });
+    if (!updatedLesson) {
+      return res.status(404).json({ message: "Lesson not found" });
     }
+
+    res.status(200).json({
+      message: "Lesson updated successfully",
+      lesson: updatedLesson,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating lesson', error });
+    console.error("Error updating lesson:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 // Search functionality for lessons (GET /search)
