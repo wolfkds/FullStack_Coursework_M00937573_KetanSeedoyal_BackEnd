@@ -3,19 +3,19 @@ const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
 const morgan = require("morgan");
 const path = require("path");
-const fs = require("fs");
 
+// Initialize the Express application
 const app = express();
 const port = 3000;
 
 // MongoDB connection setup
-const mongoUri = "mongodb+srv://test:test@cluster0.j29h4.mongodb.net/"; // replace with your MongoDB Atlas URI
+const mongoUri = "mongodb+srv://test:test@cluster0.j29h4.mongodb.net/";
 const client = new MongoClient(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useNewUrlParser: true, // Use new URL parser for connection string
+  useUnifiedTopology: true, // Use the unified topology engine
 });
 
-// Enable CORS
+// Enable CORS for all routes
 app.use(cors());
 
 // Middleware
@@ -24,20 +24,6 @@ app.use(morgan("dev")); // Logs requests to the console
 
 // Static files middleware for lesson images
 app.use("/images", express.static(path.join(__dirname, "images")));
-// app.use('/images', (req, res, next) => {
-//   const filePath = path.join(__dirname, 'images', req.path);
-
-//   // Check if the file exists
-//   fs.access(filePath, fs.constants.F_OK, (err) => {
-//     if (err) {
-//       // File does not exist
-//       res.status(404).json({ message: 'Image not found' });
-//     } else {
-//       // Serve the image
-//       res.sendFile(filePath);
-//     }
-//   });
-// });
 
 // Database and collection references
 let lessonsCollection, ordersCollection;
@@ -67,7 +53,7 @@ app.use((req, res, next) => {
 // GET route to fetch all lessons
 app.get("/lessons", async (req, res) => {
   try {
-    const lessons = await lessonsCollection.find().toArray();
+    const lessons = await lessonsCollection.find().toArray(); // Fetch all lessons
     res.json(lessons);
   } catch (error) {
     res.status(500).json({ message: "Error fetching lessons", error });
@@ -76,54 +62,33 @@ app.get("/lessons", async (req, res) => {
 
 // POST route to create a new order
 app.post("/orders", async (req, res) => {
-  const { name, phone, lessonIDs, spaces } = req.body;
+  const { name, phone, lessonIDs, spaces } = req.body; // Extract order data from request body
 
   if (!name || !phone || !Array.isArray(lessonIDs) || lessonIDs.length === 0) {
     return res.status(400).json({ message: "Invalid order data" });
   }
 
   try {
+    // Create an order object
     const order = {
       name,
       phone,
-      lessonIDs: lessonIDs.map((id) => new ObjectId(id)),
+      lessonIDs: lessonIDs.map((id) => new ObjectId(id)), // Convert lesson IDs to ObjectId
       spaces,
     };
+
+    // Insert the order into the "orders" collection
     const result = await ordersCollection.insertOne(order);
     res.json({
       message: "Order created successfully",
-      orderId: result.insertedId,
+      orderId: result.insertedId, // Send the new order's ID in the response
     });
   } catch (error) {
     res.status(500).json({ message: "Error creating order", error });
   }
 });
 
-// PUT route to update lesson availability after an order
-// app.put("/lessons/:id", async (req, res) => {
-//   const lessonId = req.params.id;
-//   const { space } = req.body;
-
-//   if (typeof space !== "number" || space < 0) {
-//     return res.status(400).json({ message: "Invalid space value" });
-//   }
-
-//   try {
-//     const result = await lessonsCollection.updateOne(
-//       { _id: new ObjectId(lessonId) },
-//       { $set: { space } }
-//     );
-
-//     if (result.matchedCount === 0) {
-//       res.status(404).json({ message: "Lesson not found" });
-//     } else {
-//       res.json({ message: "Lesson updated successfully" });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ message: "Error updating lesson", error });
-//   }
-// });
-
+// PUT route to update a lesson's details
 app.put("/lessons/:id", async (req, res) => {
   const lessonId = req.params.id;
   const updatedFields = req.body; // Contains all fields to update
@@ -157,10 +122,12 @@ app.put("/lessons/:id", async (req, res) => {
 app.get("/search", async (req, res) => {
   const query = req.query.q;
 
+  // Validate the search query
   if (!query) {
     return res.status(400).json({ message: "Search query cannot be empty" });
   }
 
+  // Define search criteria for MongoDB query
   const searchCriteria = {
     $or: [
       { subject: { $regex: query, $options: "i" } },
@@ -171,6 +138,7 @@ app.get("/search", async (req, res) => {
   };
 
   try {
+    // Find lessons matching the search criteria
     const results = await lessonsCollection.find(searchCriteria).toArray();
     res.json({ success: true, results });
   } catch (error) {
